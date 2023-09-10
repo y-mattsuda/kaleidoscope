@@ -19,7 +19,7 @@ fn main() {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 enum Token {
     Eof,
     // commands
@@ -81,9 +81,51 @@ fn gettok(input: &str) -> Vec<Token> {
                     }
                 }
             }
+            if c == '#' {
+                // Comment until end of line
+                loop {
+                    if let Some(next_c) = next_input() {
+                        if next_c != '\n' && next_c != '\r' {
+                            continue;
+                        } else {
+                            continue 'main;
+                        }
+                    } else {
+                        break 'main;
+                    }
+                }
+            }
         } else {
             break;
         }
     }
     tokens
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{gettok, Token};
+
+    #[test]
+    fn lexer_works() {
+        assert_eq!(gettok("def\n"), vec![Token::Def]);
+        assert_eq!(gettok("extern\n"), vec![Token::Extern]);
+        assert_eq!(gettok("hello\n"), vec![Token::Ident("hello".to_string())]);
+        assert_eq!(gettok("1.23\n"), vec![Token::Number(1.23)]);
+        let text_with_comment = "
+def hello # this is comment
+# this line is comment
+extern def hello
+";
+        assert_eq!(
+            gettok(text_with_comment),
+            vec![
+                Token::Def,
+                Token::Ident("hello".to_string()),
+                Token::Extern,
+                Token::Def,
+                Token::Ident("hello".to_string())
+            ]
+        );
+    }
 }
