@@ -1,33 +1,71 @@
-use std::io;
-
-use inkwell::{context::Context, OptimizationLevel};
+use std::io::{self, stdin, Read, Write};
 
 fn main() {
+    let stdin = io::stdin();
+    let mut stdout = io::stdout();
     let mut input = String::new();
-    io::stdin().read_line(& mut input).expect("failed to read line");
-    let context = Context::create();
-    let module = context.create_module("main");
-    let builder = context.create_builder();
 
-    let i32_type = context.i32_type();
-    let i8_type = context.i8_type();
-    let i8_ptr_type = i8_type.ptr_type(inkwell::AddressSpace::from(1u16));
-
-    let printf_fn_type = i32_type.fn_type(&[i8_ptr_type.into()], true);
-    let printf_fn = module.add_function("printf", printf_fn_type, None);
-
-    let main_fn_type = i32_type.fn_type(&[], false);
-    let main_fn = module.add_function("main", main_fn_type, None);
-
-    let entry_basic_block = context.append_basic_block(main_fn, "entry");
-    builder.position_at_end(entry_basic_block);
-
-    let input_string_ptr = builder.build_global_string_ptr(&input, "input");
-    builder.build_call(printf_fn, &[input_string_ptr.as_pointer_value().into()], "call");
-    builder.build_return(Some(&i32_type.const_int(0, false)));
-
-    let exec_engine = module.create_jit_execution_engine(OptimizationLevel::Aggressive).unwrap();
-    unsafe {
-        exec_engine.get_function::<unsafe extern "C" fn()>("main").unwrap().call();
+    loop {
+        print!("> ");
+        stdout.flush().unwrap();
+        input.clear();
+        stdin.read_line(&mut input).expect("failed to read line");
+        if input.as_str() == ".quit\n" {
+            break;
+        }
+        let tokens = gettok(input.as_str());
+        println!("{:?}", tokens);
+        continue;
     }
+}
+
+#[derive(Debug)]
+enum Token {
+    Eof,
+    // commands
+    Def,
+    Extern,
+    // primary
+    Ident(String),
+    Number(f64),
+}
+
+// lexer
+fn gettok(input: &str) -> Vec<Token> {
+    let mut tokens: Vec<Token> = vec![];
+    let mut input_itr = input.chars();
+    let mut next_input = || -> Option<char> { input_itr.next() };
+    'main: loop {
+        let _c = next_input();
+        if _c.is_none() {
+            break;
+        }
+        let c = _c.unwrap();
+        if c.is_whitespace() {
+            continue;
+        }
+        // ident: [a-zA-Z][a-zA-Z0-9]*
+        if c.is_alphabetic() {
+            let mut ident_chars: Vec<char> = vec![c];
+            loop {
+                let _next_c = next_input();
+                if _next_c.is_none() {
+                    break 'main;
+                }
+                let next_c = _next_c.unwrap();
+                if next_c.is_alphanumeric() {
+                    ident_chars.push(next_c);
+                } else {
+                    let ident_str: String = ident_chars.into_iter().collect();
+                    match &*ident_str {
+                        "def" => tokens.push(Token::Def),
+                        "extern" => tokens.push(Token::Extern),
+                        _ => tokens.push(Token::Ident(ident_str)),
+                    }
+                    break;
+                }
+            }
+        }
+    }
+    tokens
 }
