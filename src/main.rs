@@ -28,6 +28,7 @@ enum Token {
     // primary
     Ident(String),
     Number(f64),
+    Ope(String),
 }
 
 // lexer
@@ -55,7 +56,7 @@ fn gettok(input: &str) -> Vec<Token> {
                                 "extern" => tokens.push(Token::Extern),
                                 _ => tokens.push(Token::Ident(ident_str)),
                             }
-                            break 'ident_loop;
+                            continue 'main;
                         }
                     } else {
                         break 'main;
@@ -74,7 +75,7 @@ fn gettok(input: &str) -> Vec<Token> {
                             if let Ok(num_val) = num_str.parse::<f64>() {
                                 tokens.push(Token::Number(num_val))
                             };
-                            break 'num_loop;
+                            continue 'main;
                         }
                     } else {
                         break 'main;
@@ -95,6 +96,8 @@ fn gettok(input: &str) -> Vec<Token> {
                     }
                 }
             }
+            // Otherwise, just return the character as its ascii value
+            tokens.push(Token::Ope(c.into()));
         } else {
             break;
         }
@@ -127,5 +130,9 @@ extern def hello
                 Token::Ident("hello".to_string())
             ]
         );
+        assert_eq!(
+            gettok("1 + 3\n"),
+            vec![Token::Number(1.), Token::Ope("+".into()), Token::Number(3.)]
+        )
     }
 }
