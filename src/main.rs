@@ -62,6 +62,25 @@ fn gettok(input: &str) -> Vec<Token> {
                     }
                 }
             }
+            if c.is_ascii_digit() || c == '.' {
+                let mut num_chars: Vec<char> = vec![c];
+                'num_loop: loop {
+                    if let Some(next_c) = next_input() {
+                        if next_c.is_ascii_digit() || next_c == '.' {
+                            num_chars.push(next_c);
+                            continue 'num_loop;
+                        } else {
+                            let num_str: String = num_chars.into_iter().collect();
+                            if let Ok(num_val) = num_str.parse::<f64>() {
+                                tokens.push(Token::Number(num_val))
+                            };
+                            break 'num_loop;
+                        }
+                    } else {
+                        break 'main;
+                    }
+                }
+            }
         } else {
             break;
         }
