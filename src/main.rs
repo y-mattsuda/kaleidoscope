@@ -13,7 +13,7 @@ fn main() {
         stdout.flush().unwrap();
         input.clear();
         stdin.read_line(&mut input).expect("failed to read line");
-        if input.as_str() == ".quit\n" {
+        if input.as_str() == ".quit\n" || input.as_str() == ".q\n" {
             break;
         }
         let tokens = Lexer::new(&input).tokenize().unwrap();

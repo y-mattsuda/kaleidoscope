@@ -36,7 +36,7 @@ impl<'a> Lexer<'a> {
         while let Some(token) = self.next_token()? {
             match token {
                 Token::WhiteSpace => {}
-                Token::Comment(_) => {}
+                // Token::Comment(_) => {}
                 _ => tokens.push(token),
             }
         }
@@ -81,7 +81,7 @@ impl<'a> Lexer<'a> {
         }
         match number_str.parse::<f64>() {
             Ok(number) => Ok(Some(Token::Number(number))),
-            Err(e) => Err(LexerError::new(&format!("error: {}", e))),
+            Err(e) => Err(LexerError::new(&format!("error: {}, input: '{}'", e, number_str))),
         }
     }
 
@@ -103,7 +103,18 @@ impl<'a> Lexer<'a> {
     }
 
     fn parse_comment_token(&mut self) -> Result<Option<Token>, LexerError> {
-        todo!()
+        let mut comment_str = String::new();
+        // 先頭の#は読み飛ばす
+        self.chars.next();
+        while let Some(&c) = self.chars.peek()  {
+            if c != '\n' && c != '\r' {
+                self.chars.next();
+                comment_str.push(c);
+            } else {
+                break;
+            }
+        }
+        Ok(Some(Token::Comment(comment_str)))
     }
 }
 
@@ -145,5 +156,13 @@ mod tests {
         assert_eq!(tokens[0], Token::Extern);
         let tokens = tokenize!("rust");
         assert_eq!(tokens[0], Token::Ident("rust".to_owned()))
+    }
+
+    #[test]
+    fn test_comment() {
+        let tokens = tokenize!("#this is comment");
+        assert_eq!(tokens[0], Token::Comment("this is comment".to_owned()));
+        let tokens = tokenize!("#a\na");
+        assert_eq!(tokens, vec![Token::Comment("a".to_owned()), Token::Ident("a".to_owned())]);
     }
 }
