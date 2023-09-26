@@ -1,0 +1,13 @@
+<prototype>  ::= <identifier> "(" <params> ")"
+<params>     ::= <identifier>
+               | <identifier>, <params>
+<definition> ::= "def" <prototype> <expr> ";"
+<extern>     ::= "extern" <prototype> ";"
+<operator>   ::= "+" | "-" | "*" | "/" | "%"
+<expr>       ::= <binary> | <call> | <identifier> | <number> | <ifelse>
+               | "(" <expr> ")"
+<binary>     ::= <expr> <operator> <expr>
+<call>       ::= <identifier> "(" <arguments> ")"
+<ifelse>     ::= "if" <expr> "then" <expr> "else" <expr>
+<arguments>  ::= <expr>
+               | <expr> "," <arguments>
