@@ -53,3 +53,7 @@
     * [Create Your Own Programming Language with Rust](https://createlang.rs/intro.html)
     * [Make A Language](https://lunacookies.github.io/lang/)
     * [Learn Assembly by Writing Entirely Too Many Brainfuck Compilers](https://github.com/pretzelhammer/rust-blog/blob/master/posts/too-many-brainfuck-compilers.md)
+* Swiftでkaleidoscopeやってみた系
+  * https://marcusrossel.com/2019-09-20/kaleidoscope-0
+  * https://harlanhaskins.com/2017/01/08/building-a-compiler-with-swift-in-llvm-part-1-introduction-and-the-lexer.html
+    * [BNF記法](/src/grammar.bnf)はここを参照した
